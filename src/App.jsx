@@ -3,6 +3,7 @@ import { useAuth } from './hooks/useAuth'
 import Login from './pages/Login'
 import Home from './pages/Home'
 import BookDetail from './pages/BookDetail'
+import Landing from './pages/Landing'
 
 function App() {
   const { isAuthenticated } = useAuth()
@@ -10,19 +11,22 @@ function App() {
   return (
     <Routes>
       <Route 
+        path="/" 
+        element={<Landing />} 
+      />
+      <Route 
         path="/login" 
         element={isAuthenticated ? <Navigate to="/home" replace /> : <Login />} 
       />
       <Route 
         path="/home" 
-        element={isAuthenticated ? <Home /> : <Navigate to="/login" replace />} 
+        element={<Home />} 
       />
       <Route 
         path="/book/:id" 
         element={isAuthenticated ? <BookDetail /> : <Navigate to="/login" replace />} 
       />
-      <Route path="/" element={<Navigate to={isAuthenticated ? "/home" : "/login"} replace />} />
-    </Routes>
+    </Routes>  
   )
 }
 

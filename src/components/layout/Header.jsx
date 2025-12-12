@@ -14,7 +14,7 @@ import '../../styles/Header.css'
 
 const Header = ({ onSearch }) => {
   const [searchValue, setSearchValue] = useState('')
-  const { logout } = useAuth()
+  const { logout, isAuthenticated } = useAuth()
   const { openCart, getTotalItems } = useCart()
   const navigate = useNavigate()
 
@@ -71,7 +71,7 @@ const Header = ({ onSearch }) => {
           </button>
           <button 
             className="header-icon-button" 
-            onClick={() => navigate('/profile')}
+            onClick={() => navigate(isAuthenticated ? '/profile' : '/login')}
             title="Perfil"
           >
             <FaUser />
