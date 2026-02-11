@@ -1,24 +1,41 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { MOCK_BOOKS } from '../utils/constants'
+import { useBooksSearch } from '../hooks/useBooksSearch'
 import { useCart } from '../hooks/useCart'
 import Header from '../components/layout/Header'
 import CartSidebar from '../components/cart/CartSidebar'
 import '../styles/BookDetail.css'
 
+const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/200x280?text=Sin+imagen'
+
 const BookDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { books, loading, error } = useBooksSearch()
   const { addToCart, openCart } = useCart()
-  const book = MOCK_BOOKS.find(b => b.id === id)
+  const book = books.find(b => String(b.id) === String(id))
+  const displayBook = book
+    ? { ...book, image: book.image || PLACEHOLDER_IMAGE }
+    : null
 
   const handleAddToCart = () => {
-    if (book) {
-      addToCart(book)
+    if (displayBook) {
+      addToCart(displayBook)
       openCart()
     }
   }
 
-  if (!book) {
+  if (loading) {
+    return (
+      <div className="book-detail-container">
+        <Header />
+        <div className="book-not-found">
+          <p>Cargando...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !displayBook) {
     return (
       <div className="book-detail-container">
         <Header />
@@ -40,28 +57,40 @@ const BookDetail = () => {
 
         <div className="book-detail-grid">
           <div className="book-detail-image">
-            <img src={book.image} alt={book.title} />
+            <img src={displayBook.image} alt={displayBook.title} />
           </div>
 
           <div className="book-detail-info">
-            <h1 className="book-detail-title">{book.title}</h1>
-            <p className="book-detail-author">por {book.author}</p>
+            <h1 className="book-detail-title">{displayBook.title}</h1>
+            <p className="book-detail-author">por {displayBook.author}</p>
 
             <div className="book-detail-meta">
-              <span className="book-meta-item">Género: {book.genre}</span>
-              <span className="book-meta-item">Idioma: {book.language}</span>
-              <span className="book-meta-item">Páginas: {book.pages}</span>
+              {displayBook.category && (
+                <span className="book-meta-item">Género: {displayBook.category}</span>
+              )}
+              {displayBook.publicationDate && (
+                <span className="book-meta-item">
+                  Publicación: {new Date(displayBook.publicationDate).getFullYear()}
+                </span>
+              )}
+              {displayBook.rating != null && (
+                <span className="book-meta-item">Valoración: {displayBook.rating}</span>
+              )}
             </div>
 
             <div className="book-detail-price">
               <span className="price-label">Precio:</span>
-              <span className="price-value">${book.price.toLocaleString('es-CO')}</span>
+              <span className="price-value">
+                ${Number(displayBook.price).toLocaleString('es-CO')}
+              </span>
             </div>
 
-            <div className="book-detail-description">
-              <h3>Descripción</h3>
-              <p>{book.description}</p>
-            </div>
+            {displayBook.description && (
+              <div className="book-detail-description">
+                <h3>Descripción</h3>
+                <p>{displayBook.description}</p>
+              </div>
+            )}
 
             <button className="add-to-cart-button" onClick={handleAddToCart}>
               Agregar al carrito

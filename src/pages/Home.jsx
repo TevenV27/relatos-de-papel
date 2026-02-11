@@ -4,10 +4,12 @@ import Sidebar from '../components/layout/Sidebar'
 import Banner from '../components/layout/Banner'
 import BookList from '../components/books/BookList'
 import CartSidebar from '../components/cart/CartSidebar'
-import { MOCK_BOOKS } from '../utils/constants'
+import { useBooksSearch } from '../hooks/useBooksSearch'
+import { POPULARITY_OPTIONS } from '../utils/constants'
 import '../styles/Home.css'
 
 const Home = () => {
+  const { books, loading, error, refetch } = useBooksSearch()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedGenre, setSelectedGenre] = useState('Todos')
   const [priceFromInput, setPriceFromInput] = useState('')
@@ -18,6 +20,11 @@ const Home = () => {
 
   const priceFromTimeoutRef = useRef(null)
   const priceToTimeoutRef = useRef(null)
+
+  const genres = useMemo(
+    () => ['Todos', ...new Set(books.map(b => b.category).filter(Boolean))],
+    [books]
+  )
 
   const handleSearch = (query) => {
     setSearchQuery(query)
@@ -84,43 +91,44 @@ const Home = () => {
   }
 
   const filteredBooks = useMemo(() => {
-    let books = [...MOCK_BOOKS]
+    let result = [...books]
 
     if (searchQuery) {
-      books = books.filter(book =>
-        book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        book.author.toLowerCase().includes(searchQuery.toLowerCase())
+      const q = searchQuery.toLowerCase()
+      result = result.filter(
+        book =>
+          book.title?.toLowerCase().includes(q) ||
+          book.author?.toLowerCase().includes(q)
       )
     }
 
     if (selectedGenre !== 'Todos') {
-      books = books.filter(book => book.genre === selectedGenre)
+      result = result.filter(book => book.category === selectedGenre)
     }
 
     if (priceFrom) {
       const fromValue = priceFrom.replace(/\./g, '')
       const from = parseFloat(fromValue)
       if (!isNaN(from)) {
-        books = books.filter(book => book.price >= from)
+        result = result.filter(book => book.price >= from)
       }
     }
     if (priceTo) {
       const toValue = priceTo.replace(/\./g, '')
       const to = parseFloat(toValue)
       if (!isNaN(to)) {
-        books = books.filter(book => book.price <= to)
+        result = result.filter(book => book.price <= to)
       }
     }
 
-    // Ordenar por popularidad
     if (selectedPopularity === 'Más vendidos') {
-      books.sort((a, b) => b.sales - a.sales)
+      result = [...result].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
     } else if (selectedPopularity === 'Menos vendidos') {
-      books.sort((a, b) => a.sales - b.sales)
+      result = [...result].sort((a, b) => (a.rating ?? 0) - (b.rating ?? 0))
     }
 
-    return books
-  }, [searchQuery, selectedGenre, priceFrom, priceTo, selectedPopularity])
+    return result
+  }, [books, searchQuery, selectedGenre, priceFrom, priceTo, selectedPopularity])
 
   return (
     <div className="home-container">
@@ -128,6 +136,7 @@ const Home = () => {
       <Banner />
       <div className="home-content">
         <Sidebar
+          genres={genres}
           selectedGenre={selectedGenre}
           priceFrom={priceFromInput}
           priceTo={priceToInput}
@@ -139,7 +148,12 @@ const Home = () => {
           onClearFilters={handleClearFilters}
         />
         <main className="main-content">
-          <BookList books={filteredBooks} />
+          <BookList
+            books={filteredBooks}
+            loading={loading}
+            error={error}
+            onRetry={refetch}
+          />
         </main>
       </div>
       <CartSidebar />

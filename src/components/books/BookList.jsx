@@ -1,7 +1,30 @@
 import BookCard from './BookCard'
 import '../../styles/BookList.css'
 
-const BookList = ({ books }) => {
+const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/200x280?text=Sin+imagen'
+
+const BookList = ({ books, loading, error, onRetry }) => {
+  if (loading) {
+    return (
+      <div className="book-list book-list-loading">
+        <p>Cargando catálogo...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="book-list book-list-error">
+        <p>{error}</p>
+        {onRetry && (
+          <button type="button" className="book-list-retry" onClick={onRetry}>
+            Reintentar
+          </button>
+        )}
+      </div>
+    )
+  }
+
   if (books.length === 0) {
     return (
       <div className="book-list-empty">
@@ -18,7 +41,10 @@ const BookList = ({ books }) => {
       </div>
       <div className="book-list-grid">
         {books.map(book => (
-          <BookCard key={book.id} book={book} />
+          <BookCard
+            key={book.id}
+            book={{ ...book, image: book.image || PLACEHOLDER_IMAGE }}
+          />
         ))}
       </div>
     </div>

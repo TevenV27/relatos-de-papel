@@ -2,6 +2,7 @@ import { GENRES, POPULARITY_OPTIONS } from '../../utils/constants'
 import '../../styles/Sidebar.css'
 
 const Sidebar = ({
+    genres = GENRES,
     selectedGenre,
     priceFrom,
     priceTo,
@@ -20,7 +21,7 @@ const Sidebar = ({
                 <div className="filter-section">
                     <h3 className="filter-section-title">Género</h3>
                     <div className="filter-options">
-                        {GENRES.map(genre => (
+                        {genres.map(genre => (
                             <label key={genre} className="filter-option">
                                 <input
                                     type="radio"
