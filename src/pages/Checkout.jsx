@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCart } from '../hooks/useCart'
-import { FaArrowLeft, FaCreditCard, FaLock } from 'react-icons/fa'
+import { usePayments } from '../hooks/usePayments'
+import { FaArrowLeft, FaCreditCard, FaLock, FaSpinner } from 'react-icons/fa'
 import '../styles/Checkout.css'
 
 const Checkout = () => {
   const navigate = useNavigate()
   const { cartItems, getTotalPrice, clearCart } = useCart()
+  const { createPayment, loading: paymentLoading, error: paymentError } = usePayments()
 
   const [formData, setFormData] = useState({
     // Información de envío
@@ -24,6 +26,7 @@ const Checkout = () => {
   })
 
   const [errors, setErrors] = useState({})
+  const [processingStatus, setProcessingStatus] = useState('')
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -77,14 +80,38 @@ const Checkout = () => {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
 
     if (validateForm()) {
-      // Aquí iría la lógica de procesamiento del pago
-      alert('¡Compra procesada exitosamente! Gracias por tu compra.')
-      clearCart()
-      navigate('/home')
+      setProcessingStatus('Procesando pago...')
+
+      try {
+        // Crear un pago por cada libro en el carrito
+        // El microservicio espera un pago por libro según el DTO
+        const paymentPromises = cartItems.map(item => {
+          const paymentDTO = {
+            bookId: item.id,
+            quantity: item.quantity,
+            unitPrice: item.price,
+            totalAmount: item.price * item.quantity,
+            customerName: formData.fullName,
+            customerEmail: formData.email,
+            paymentMethod: 'CREDIT_CARD', // Simplificado para este ejemplo
+            status: 'COMPLETED' // Asumimos completado para la demo
+          }
+          return createPayment(paymentDTO)
+        })
+
+        await Promise.all(paymentPromises)
+
+        alert('¡Compra procesada exitosamente! Gracias por tu compra.')
+        clearCart()
+        navigate('/home')
+      } catch (err) {
+        console.error('Error al procesar el pago:', err)
+        setProcessingStatus('Error al procesar el pago. Por favor intente nuevamente.')
+      }
     }
   }
 
@@ -115,6 +142,12 @@ const Checkout = () => {
         <h1>Finalizar Compra</h1>
       </div>
 
+      {(paymentError || processingStatus && !paymentLoading) && (
+        <div className={`status-message ${paymentError ? 'error' : 'info'}`}>
+          {paymentError || processingStatus}
+        </div>
+      )}
+
       <div className="checkout-content">
         <div className="checkout-main">
           <form onSubmit={handleSubmit} className="checkout-form">
@@ -133,6 +166,7 @@ const Checkout = () => {
                     onChange={handleInputChange}
                     placeholder="Juan Pérez"
                     className={errors.fullName ? 'error' : ''}
+                    disabled={paymentLoading}
                   />
                   {errors.fullName && <span className="error-message">{errors.fullName}</span>}
                 </div>
@@ -149,6 +183,7 @@ const Checkout = () => {
                     onChange={handleInputChange}
                     placeholder="juan@ejemplo.com"
                     className={errors.email ? 'error' : ''}
+                    disabled={paymentLoading}
                   />
                   {errors.email && <span className="error-message">{errors.email}</span>}
                 </div>
@@ -163,6 +198,7 @@ const Checkout = () => {
                     onChange={handleInputChange}
                     placeholder="300 123 4567"
                     className={errors.phone ? 'error' : ''}
+                    disabled={paymentLoading}
                   />
                   {errors.phone && <span className="error-message">{errors.phone}</span>}
                 </div>
@@ -179,6 +215,7 @@ const Checkout = () => {
                     onChange={handleInputChange}
                     placeholder="Calle 123 #45-67"
                     className={errors.address ? 'error' : ''}
+                    disabled={paymentLoading}
                   />
                   {errors.address && <span className="error-message">{errors.address}</span>}
                 </div>
@@ -195,6 +232,7 @@ const Checkout = () => {
                     onChange={handleInputChange}
                     placeholder="Bogotá"
                     className={errors.city ? 'error' : ''}
+                    disabled={paymentLoading}
                   />
                   {errors.city && <span className="error-message">{errors.city}</span>}
                 </div>
@@ -209,6 +247,7 @@ const Checkout = () => {
                     onChange={handleInputChange}
                     placeholder="110111"
                     className={errors.postalCode ? 'error' : ''}
+                    disabled={paymentLoading}
                   />
                   {errors.postalCode && <span className="error-message">{errors.postalCode}</span>}
                 </div>
@@ -233,6 +272,7 @@ const Checkout = () => {
                     placeholder="1234 5678 9012 3456"
                     maxLength="19"
                     className={errors.cardNumber ? 'error' : ''}
+                    disabled={paymentLoading}
                   />
                   {errors.cardNumber && <span className="error-message">{errors.cardNumber}</span>}
                 </div>
@@ -249,6 +289,7 @@ const Checkout = () => {
                     onChange={handleInputChange}
                     placeholder="JUAN PEREZ"
                     className={errors.cardName ? 'error' : ''}
+                    disabled={paymentLoading}
                   />
                   {errors.cardName && <span className="error-message">{errors.cardName}</span>}
                 </div>
@@ -266,6 +307,7 @@ const Checkout = () => {
                     placeholder="MM/AA"
                     maxLength="5"
                     className={errors.expiryDate ? 'error' : ''}
+                    disabled={paymentLoading}
                   />
                   {errors.expiryDate && <span className="error-message">{errors.expiryDate}</span>}
                 </div>
@@ -281,6 +323,7 @@ const Checkout = () => {
                     placeholder="123"
                     maxLength="4"
                     className={errors.cvv ? 'error' : ''}
+                    disabled={paymentLoading}
                   />
                   {errors.cvv && <span className="error-message">{errors.cvv}</span>}
                 </div>
@@ -291,8 +334,18 @@ const Checkout = () => {
               </div>
             </div>
 
-            <button type="submit" className="submit-button">
-              Confirmar Compra - ${total.toLocaleString('es-CO')}
+            <button
+              type="submit"
+              className="submit-button"
+              disabled={paymentLoading}
+            >
+              {paymentLoading ? (
+                <>
+                  <FaSpinner className="spinner" /> Procesando...
+                </>
+              ) : (
+                `Confirmar Compra - $${total.toLocaleString('es-CO')}`
+              )}
             </button>
           </form>
         </div>

@@ -5,7 +5,6 @@ import Banner from '../components/layout/Banner'
 import BookList from '../components/books/BookList'
 import CartSidebar from '../components/cart/CartSidebar'
 import { useBooksSearch } from '../hooks/useBooksSearch'
-import { POPULARITY_OPTIONS } from '../utils/constants'
 import '../styles/Home.css'
 
 const Home = () => {
