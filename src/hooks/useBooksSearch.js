@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 
 const API_BASE = 'http://localhost:8080'
-const SEARCH_PATH = '/api/books/search'
+const SEARCH_PATH = '/api/books'
 
 
 function normalizeBook(raw) {
