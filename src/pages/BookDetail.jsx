@@ -14,7 +14,7 @@ const BookDetail = () => {
   const { addToCart, openCart } = useCart()
   const book = books.find(b => String(b.id) === String(id))
   const displayBook = book
-    ? { ...book, image: book.image || PLACEHOLDER_IMAGE }
+    ? { ...book, image: book.image ?? PLACEHOLDER_IMAGE }
     : null
 
   const handleAddToCart = () => {

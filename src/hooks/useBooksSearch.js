@@ -7,7 +7,7 @@ const SEARCH_PATH = '/api/books/search'
 const PLACEHOLDER_IMAGE = `${API_BASE}/images/placeholder.jpg`
 
 function buildImageUrl(raw) {
-  const url = raw.cover_image_url ?? raw.image ?? null
+  const url = raw.coverImageUrl ?? raw.cover_image_url ?? raw.image ?? null
   if (!url) return null
   if (url.startsWith('http://') || url.startsWith('https://')) return url
   return `${API_BASE}${url.startsWith('/') ? '' : '/'}${url}`
