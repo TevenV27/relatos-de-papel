@@ -1,8 +1,17 @@
 import { useState, useEffect, useCallback } from 'react'
 
-const API_BASE = 'http://localhost:8080'
+const API_BASE = import.meta.env.VITE_API_BASE_URL
 const SEARCH_PATH = '/api/books/search'
 
+
+const PLACEHOLDER_IMAGE = `${API_BASE}/images/placeholder.jpg`
+
+function buildImageUrl(raw) {
+  const url = raw.cover_image_url ?? raw.image ?? null
+  if (!url) return null
+  if (url.startsWith('http://') || url.startsWith('https://')) return url
+  return `${API_BASE}${url.startsWith('/') ? '' : '/'}${url}`
+}
 
 function normalizeBook(raw) {
   return {
@@ -16,7 +25,7 @@ function normalizeBook(raw) {
     publicationDate: raw.publicationDate,
     rating: raw.rating,
     visible: raw.visible,
-    image: raw.image ?? null
+    image: buildImageUrl(raw)
   }
 }
 

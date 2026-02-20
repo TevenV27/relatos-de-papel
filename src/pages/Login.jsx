@@ -4,16 +4,24 @@ import { useAuth } from '../hooks/useAuth'
 import '../styles/Login.css'
 
 const Login = () => {
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    if (email && password) {
-      login()
+    setError('')
+    setLoading(true)
+    try {
+      await login(username, password)
       navigate('/home')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -26,13 +34,15 @@ const Login = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">
+          {error && <p className="login-error">{error}</p>}
+
           <div className="form-group">
             <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Correo electrónico"
+              type="text"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Usuario"
               required
             />
           </div>
@@ -51,8 +61,8 @@ const Login = () => {
             </div>
           </div>
 
-          <button type="submit" className="login-button">
-            INICIAR SESIÓN
+          <button type="submit" className="login-button" disabled={loading}>
+            {loading ? 'CARGANDO...' : 'INICIAR SESIÓN'}
           </button>
         </form>
 

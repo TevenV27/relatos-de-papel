@@ -17,10 +17,16 @@ const BookCard = ({ book }) => {
     openCart()
   }
 
+  const PLACEHOLDER = 'https://via.placeholder.com/200x280?text=Sin+imagen'
+
   return (
     <div className="book-card" onClick={handleCardClick}>
       <div className="book-card-image">
-        <img src={book.image} alt={book.title} />
+        <img
+          src={book.image || PLACEHOLDER}
+          alt={book.title}
+          onError={(e) => { e.currentTarget.src = PLACEHOLDER }}
+        />
         <div className="book-card-price-badge">
           ${book.price.toLocaleString('es-CO')}
         </div>
