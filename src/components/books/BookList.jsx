@@ -43,7 +43,7 @@ const BookList = ({ books, loading, error, onRetry }) => {
         {books.map(book => (
           <BookCard
             key={book.id}
-            book={{ ...book, image: book.image || PLACEHOLDER_IMAGE }}
+            book={{ ...book, image: book.image ?? PLACEHOLDER_IMAGE }}
           />
         ))}
       </div>
