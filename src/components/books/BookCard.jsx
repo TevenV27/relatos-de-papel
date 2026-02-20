@@ -17,7 +17,7 @@ const BookCard = ({ book }) => {
     openCart()
   }
 
-  const PLACEHOLDER = 'https://via.placeholder.com/200x280?text=Sin+imagen'
+  const PLACEHOLDER = 'sin_portada.jpg'
 
   return (
     <div className="book-card" onClick={handleCardClick}>
