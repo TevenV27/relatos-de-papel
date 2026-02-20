@@ -1,7 +1,7 @@
 import BookCard from './BookCard'
 import '../../styles/BookList.css'
 
-const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/200x280?text=Sin+imagen'
+const PLACEHOLDER_IMAGE = 'sin_portada.jpg'
 
 const BookList = ({ books, loading, error, onRetry }) => {
   if (loading) {

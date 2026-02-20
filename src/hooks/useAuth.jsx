@@ -4,17 +4,30 @@ const AuthContext = createContext(null)
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return localStorage.getItem('isAuthenticated') === 'true'
+    return !!localStorage.getItem('token')
   })
 
-  const login = () => {
+  const login = async (username, password) => {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    })
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}))
+      throw new Error(error.message || 'Credenciales incorrectas')
+    }
+
+    const data = await response.json()
+    const token = data.token ?? data.accessToken ?? data.jwt
+    localStorage.setItem('token', token)
     setIsAuthenticated(true)
-    localStorage.setItem('isAuthenticated', 'true')
   }
 
   const logout = () => {
     setIsAuthenticated(false)
-    localStorage.removeItem('isAuthenticated')
+    localStorage.removeItem('token')
   }
 
   return (

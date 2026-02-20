@@ -5,7 +5,7 @@ import Header from '../components/layout/Header'
 import CartSidebar from '../components/cart/CartSidebar'
 import '../styles/BookDetail.css'
 
-const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/200x280?text=Sin+imagen'
+const PLACEHOLDER_IMAGE = 'sin_portada.jpg'
 
 const BookDetail = () => {
   const { id } = useParams()

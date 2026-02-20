@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 
-const API_BASE = 'http://localhost:8080'
+const API_BASE = import.meta.env.VITE_API_BASE_URL
 const PAYMENTS_PATH = '/api/payments'
 
 export function usePayments() {
